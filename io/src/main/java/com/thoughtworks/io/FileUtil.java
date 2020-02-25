@@ -3,10 +3,7 @@ package com.thoughtworks.io;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Objects;
 
-import static java.nio.file.StandardCopyOption.COPY_ATTRIBUTES;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 public class FileUtil {
@@ -56,24 +53,18 @@ public class FileUtil {
   }
 
     /**
-     *use Files.walk() to copy files. 然并卵，也不能一把copy全部，并没有更简单。forget it！:d
+     *use Files.walk() to copy files.
      */
+
   public static void walkFilesCopy(File from, File to) throws IOException {
     createIfNotExist(from, to);
-    Files.walk(from.toPath(), 1)
+    Files.walk(from.toPath())
             .filter(src -> src != from.toPath())
             .forEach(src -> {
               try {
-                Files.copy(src, to.toPath().resolve(src.toFile().getName()), REPLACE_EXISTING);
+                Files.copy(src, to.toPath().resolve(from.toPath().relativize(src)), REPLACE_EXISTING);
               } catch (IOException e) {
                 e.printStackTrace();
-              }
-              if (src.toFile().isDirectory() && src.toFile().list().length > 0) {
-                try {
-                  walkFilesCopy(src.toFile(), to.toPath().resolve(src.toFile().getName()).toFile());
-                } catch (IOException e) {
-                  e.printStackTrace();
-                }
               }
             });
   }
