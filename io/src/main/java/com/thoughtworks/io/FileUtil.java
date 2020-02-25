@@ -4,8 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
-
 public class FileUtil {
 
   /**
@@ -52,20 +50,30 @@ public class FileUtil {
     }
   }
 
-    /**
-     *use Files.walk() to copy files.
-     */
-
+  /**
+   * use Files.walk() to copy files. Files.walk() generates all paths under the source path, including both directory and file.
+   * Files.walk() employs depth-first manner during traversal, so it will creates folder first then goes down to its files.
+   */
   public static void walkFilesCopy(File from, File to) throws IOException {
     createIfNotExist(from, to);
     Files.walk(from.toPath())
             .filter(src -> src != from.toPath())
             .forEach(src -> {
               try {
-                Files.copy(src, to.toPath().resolve(from.toPath().relativize(src)), REPLACE_EXISTING);
+                System.out.println(src);
+                Files.copy(src, to.toPath().resolve(from.toPath().relativize(src)));
               } catch (IOException e) {
                 e.printStackTrace();
               }
             });
+  }
+
+  /**
+   * Use Files.walkFileTree() method to traverse `from` file/directory;
+   * MyFileVisitor.java was used as FileVisitor, which overrides methods to achieve copy goal.
+   */
+  public static void walkFileTreeCopy(File from, File to) throws IOException {
+    deleteDir(to);
+    Files.walkFileTree(from.toPath(), new MyFileVisitor(from, to));
   }
 }
